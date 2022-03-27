@@ -1,0 +1,8 @@
+---
+repoDescription: "xyz xyz CICD & Pipeline Toolset"
+repoOwner: "xyz xyz AT"
+defaults: ~
+projects:
+  test-project:
+    notifications:
+      driverName: "notify-bitbucket"

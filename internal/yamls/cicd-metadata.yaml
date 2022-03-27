@@ -1,0 +1,171 @@
+---
+repoDescription: "Aerospike"
+repoOwner: "AT DATA 1"
+# Defines configuration to be inherited by all projects in this repo unless explicitly overridden or disabled.
+# This reduces the amount of boilerplate for projects that have similar build & deploy processes.
+defaults:
+  # Configures analysis to be carried out during the build stage
+  static-analysis:
+    driverName: "static-analysis-sonarqube"
+    driverOpts:
+      projectKey: "EI:aerospike-deployment"
+
+  # Configures deployment of application secrets
+  secrets:
+    ATDEV1:
+      idm-kerberos: # username@DEV-xyz.NET
+        - name: username
+          secretId: 58442
+        - name: password
+          secretId: 58442
+      testrail:
+        - name: username
+          secretId: 59982
+        - name: password
+          secretId: 59982
+    INT:
+      idm-kerberos: # username@DEV-xyz.NET
+        - name: username
+          secretId: 58442
+        - name: password
+          secretId: 58442
+      testrail:
+        - name: username
+          secretId: 59982
+        - name: password
+          secretId: 59982
+    PERF3-NVAN:
+      idm-kerberos: # username@DEV-xyz.NET
+        - name: username
+          secretId: 58442
+        - name: password
+          secretId: 58442
+      testrail:
+        - name: username
+          secretId: 59982
+        - name: password
+          secretId: 59982
+    PERF3-TOR:
+      idm-kerberos: # username@DEV-xyz.NET
+        - name: username
+          secretId: 58442
+        - name: password
+          secretId: 58442
+      testrail:
+        - name: username
+          secretId: 59982
+        - name: password
+          secretId: 59982
+
+  # Configures where artifacts should be persisted once built. Used by the "at-base-build" job
+  publish:
+    driverName: "publish-artifactory-docker"
+    driverOpts:
+      # Configures authentication to use when pushing to Artifactory
+      authentication:
+        artifactory:
+          # Perform docker login using Jenkins supplied username and password
+          method: "docker"
+          provider: "jenkins-username-password"
+          details:
+            # Name of Jenkins username with password credential
+            credentialsId: "artifactory_api_key_username_password"
+
+  # User defined environment name. When the deployment job is called the TARGET_ENV should match one of these
+  targets:
+    ATDEV1:
+      datacenter: "nvan"
+    INT:
+      datacenter: "nvan"
+    PERF3-NVAN:
+      datacenter: "nvan"
+    PERF3-TOR:
+      datacenter: "tor"
+
+# Defines project specific configuration
+projects:
+  # Builds and deploys nightly to atdev1 to test code and ansible playbook deployment
+  nightly-aerospike:
+    # Configures how to build artifacts. Used by the "at-base-build" job in Jenkins
+    builds:
+      # Build driver that produces a Docker image and outputs a code test coverage report
+      driverName: "build-docker-with-reports"
+      driverOpts:
+        # Sets default path to the Dockerfile
+        chdirTo: "./docker"
+        dockerfileLocation: "./Dockerfile"
+        imageName: "at/deployers/aerospike-deployer"
+
+    # Configures deployment of application(s). This is primarily used by the "at-base-deploy" job
+    deploy:
+      # Ansible specific deployer supporting environment specific templating
+      driverName: "deploy-ansible-with-testrail-reporting"
+      driverOpts:
+        imageName: "at/deployers/aerospike-deployer"
+        runAnsible:
+          - "master"
+          - "rbac-check"
+          - "verify"
+          - "testdata-load"
+          - "testdata-read"
+          - "xdr-verify"
+          - "benchmark"
+
+    # Configures which tests to run
+    tests:
+      ATDEV1:
+        testrail-reporting:
+          - name: "Aerospike-nightly"
+            testCaseId: 2705197
+
+
+  # Tests code commits to bitbucket against a set of ansible playbooks
+  bitbucket-aerospike:
+    # Enables automatic notifications for key pipeline events (e.g. build started, build failure)
+    notifications:
+      # Sends notifications to the default bitbucket instance
+      driverName: "notify-bitbucket"
+
+    builds:
+      # Build driver that creates a docker-compose cluster
+      driverName: "build-docker-compose"
+      driverOpts:
+        chdirTo: "./docker-compose"
+        imageName: "at/deployers/aerospike-deployer"
+        dockerYamlLocation: "./docker-compose.yml"
+        runAnsible:
+          - "master"
+          - "rbac-check"
+          - "verify"
+          - "testdata-load"
+          - "testdata-read"
+          - "xdr-verify"
+          - "benchmark"
+
+    publish:
+      disabled: true
+
+    deploy:
+      disabled: true
+
+
+  patching-aerospike:
+    builds:
+      # Build driver that produces a Docker image and outputs a code test coverage report
+      driverName: "build-docker-with-reports"
+      driverOpts:
+        # Sets default path to the Dockerfile
+        chdirTo: "./docker"
+        dockerfileLocation: "./Dockerfile"
+        imageName: "at/deployers/aerospike-deployer"
+
+    # Configures deployment of application(s). This is primarily used by the "at-base-deploy" job
+    deploy:
+      # Ansible specific deployer supporting environment specific templating
+      driverName: "deploy-ansible"
+      driverOpts:
+        imageName: "at/deployers/aerospike-deployer"
+        runAnsible:
+          - "update-os"
+          - "update-os-check"
+          - "rolling-reboot-hosts"

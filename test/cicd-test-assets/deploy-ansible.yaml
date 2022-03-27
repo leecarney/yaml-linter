@@ -1,0 +1,18 @@
+---
+repoDescription: "xyz xyz CICD & Pipeline Toolset"
+repoOwner: "xyz xyz AT"
+defaults: ~
+projects:
+  test-project:
+    deploy:
+      driverName: "deploy-ansible"
+      driverOpts:
+        imageName: "at/deployers/aerospike-deployer"
+        runAnsible:
+          - "master"
+          - "rbac-check"
+          - "verify"
+          - "testdata-load"
+          - "testdata-read"
+          - "xdr-verify"
+          - "benchmark"

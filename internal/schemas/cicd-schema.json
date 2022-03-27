@@ -1,0 +1,316 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+
+  "definitions": {
+    "main-definition": {
+      "$id": "#definitions/main-definition",
+      "additionalProperties": false,
+      "properties": {
+        "builds": {
+          "$ref": "#definitions/builds"
+        },
+        "deploy": {
+          "$ref": "#definitions/deploy"
+        },
+        "notifications": {
+          "$ref": "#definitions/notifications"
+        },
+        "publish": {
+          "$ref": "#definitions/publish"
+        },
+        "secrets": {
+          "$ref": "#definitions/secrets"
+        },
+        "static-analysis": {
+          "$ref": "#definitions/static-analysis"
+        },
+        "targets": {
+          "$ref": "#definitions/targets"
+        },
+        "tests": {
+          "$ref": "#definitions/tests"
+        }
+      },
+      "title": "The defaults defined for all projects in the repo",
+      "type": ["object","null"]
+    },
+    "builds": {
+      "$id": "#definitions/builds",
+      "properties": {
+        "disabled": {
+          "type": "boolean"
+        },
+        "driverName": {
+          "enum": [
+            "build-docker",
+            "build-docker-with-reports",
+            "build-docker-compose",
+            "build-dryrun",
+            "build-maven-in-docker-with-reports"
+          ],
+          "type": "string"
+        },
+        "driverOpts": {
+          "$ref": "#definitions/builds/driverOpts"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "builds/driverOpts": {
+      "$id": "#definitions/builds/driverOpts",
+      "additionalProperties": false,
+      "properties": {
+        "chdirTo": {
+          "type": "string"
+        },
+        "dockerfileLocation": {
+          "type": "string"
+        },
+        "dockerYamlLocation": {
+          "type": "string"
+        },
+        "buildImage": {
+          "type": "string",
+          "pattern": "^([\\/]?[a-z0-9]+)+(?:[._-]{1,2}[a-z0-9]+)*[:]{1}([a-z0-9]+)(?:[._-]{1,2}[a-z0-9]+)*$"
+        },
+        "buildCommand": {
+          "type": "string"
+        },
+        "imageName": {
+          "type": "string"
+        },
+        "sourcePath": {
+          "type": "string"
+        },
+        "runReport": {
+          "type": "string"
+        },
+        "sourcePaths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "runAnsible": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "type": "object"
+    },
+    "targets": {
+      "$id": "#definitions/targets",
+      "type": "object",
+      "patternProperties": {
+        "^(.*)$": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": false
+    },
+    "tests": {
+      "$id": "#definitions/tests",
+      "type": "object",
+      "patternProperties": {
+        "^(.*)$": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": false
+    },
+    "secrets": {
+      "$id": "#definitions/secrets",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^(.*)$": {
+        }
+      },
+      "type": "object"
+    },
+
+    "deploy": {
+      "$id": "#definitions/deploy",
+      "properties": {
+        "disabled": {
+          "type": "boolean"
+        },
+        "driverName": {
+          "enum": [
+            "deploy-ansible",
+            "deploy-ansible-with-testrail-reporting"
+          ],
+          "type": "string"
+        },
+        "driverOpts": {
+          "properties": {
+            "authentication": {
+              "$ref": "#definitions/authentication-block"
+            },
+            "runAnsible": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "type": "object"
+    },
+    "publish": {
+      "$id": "#definitions/publish",
+      "properties": {
+        "disabled": {
+          "type": "boolean"
+        },
+        "driverName": {
+          "enum": [
+            "publish-artifactory-docker"
+          ],
+          "type": "string"
+        },
+        "driverOpts": {
+          "$ref": "#definitions/publish/driverOpts"
+        }
+      },
+      "additionalProperties": false,
+      "type": ["object","array"],
+      "items": {
+        "$ref": "#definitions/publish"
+      }
+    },
+    "notifications": {
+      "$id": "#definitions/notifications",
+      "additionalProperties": false,
+      "properties": {
+        "driverName": {
+          "enum": [
+            "notify-bitbucket"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "static-analysis": {
+      "$id": "#definitions/static-analysis",
+      "properties": {
+        "driverName": {
+          "disabled": {
+            "type": "boolean"
+          },
+          "enum": [
+            "static-analysis-sonarqube"
+          ],
+          "type": "string"
+        },
+        "driverOpts": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "projectKey": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "authentication-block": {
+      "$id": "#definitions/authentication-block",
+      "additionalProperties": false,
+      "properties": {
+        "artifactory": {
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "method": {
+              "$ref": "#definitions/authentication-methods"
+            },
+            "provider": {
+              "$ref": "#definitions/authentication-providers"
+            },
+            "details": {
+              "type": "object"
+            }
+          },
+          "additionalProperties": false,
+          "type": ["object", "string"]
+        }
+      },
+      "type": "object"
+    },
+    "authentication-methods": {
+      "$id": "#definitions/authentication-methods",
+      "enum": [
+        "docker",
+        "username-password"
+      ],
+      "type": "string"
+    },
+    "authentication-providers": {
+      "$id": "#definitions/authentication-providers",
+      "enum": [
+        "jenkins-secret-text",
+        "jenkins-username-password"
+      ],
+      "type": "string"
+    },
+    "publish/driverOpts": {
+      "$id": "#definitions/publish/driverOpts",
+      "properties": {
+        "authentication": {
+          "$ref": "#definitions/authentication-block"
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    }
+  },
+
+  "$id": "latest.json",
+  "description": "CICD Pipeline Metadata Yaml",
+  "title": "Root xyz xyz CICD Metadata Schema",
+  "type": "object",
+  "required": [
+    "repoDescription",
+    "repoOwner",
+    "projects"
+  ],
+  "properties": {
+    "repoDescription": {
+      "$id": "#/properties/repoDescription",
+      "type": "string",
+      "title": "Repository Description",
+      "default": "",
+      "examples": [
+        "Automation and Tools"
+      ],
+      "pattern": "^(.*)$"
+    }, "repoOwner": {
+      "$id": "#/properties/repoOwner",
+      "type": "string",
+      "title": "Repository Owner",
+      "default": "",
+      "examples": [
+        "AT Pod"
+      ],
+      "pattern": "^(.*)$"
+    }, "defaults": {
+      "$id": "#/properties/defaults",
+      "$ref": "#definitions/main-definition"
+    }, "projects": {
+      "$id": "#/properties/projects",
+      "type": ["object", "null"],
+      "patternProperties": {
+        "^(.*)$": { "$ref": "#definitions/main-definition" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

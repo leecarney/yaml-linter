@@ -1,0 +1,14 @@
+---
+repoDescription: "xyz xyz CICD & Pipeline Toolset"
+repoOwner: "xyz xyz AT"
+defaults:
+  publish:
+    driverName: "publish-artifactory-docker"
+    driverOpts:
+      authentication:
+        artifactory:
+          method: "docker"
+          provider: "jenkins-username-password"
+          details:
+            credentialsId: "artifactory_api_key_username_password"
+projects: ~

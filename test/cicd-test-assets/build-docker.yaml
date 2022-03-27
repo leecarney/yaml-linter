@@ -1,0 +1,12 @@
+---
+repoDescription: "xyz xyz CICD & Pipeline Toolset"
+repoOwner: "xyz xyz AT"
+defaults: ~
+projects:
+  test-project:
+    builds:
+      driverName: "build-docker"
+      driverOpts:
+        chdirTo: "./docker"
+        buildImage: "maven:latest"
+        buildCommand: "mvn package"
